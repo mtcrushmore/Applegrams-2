@@ -2,35 +2,36 @@ var Board = Backbone.Model.extend({
 
   initialize: function () {
 
-    //These functions operate on one or all of the three 10-by-10 matrices used as our Models, and built at the bottom of initialize (scroll down).
-    // (0,0) is the coordinate of the top-left-most spot in each matrix.
-    //The most important matrix is the "letterMatrix," which holds a value of zero where there are no tiles placed, and values of the letter itself, where it is placed
-    //The redLetterMatrix keeps track of valid column-wise words, each letter of each valid is a '1'. The blueLetterMatrix does the same for row-wise words.
-
     this.width = 12;
     this.height = 10;
 
-    // As of now, the following two functions are the only ones directly called outside of this file
+    this.emptySpot = {
+      letter: 0,
+      row: 0,
+      col: 0
+    }
+
     this.switchPieces = function (x, y, X, Y) {
-      var hold = this.matrix(x, y);
-      this.addPiece(x, y, this.matrix(X, Y));
+      var hold = this.letter(x, y);
+      this.addPiece(x, y, this.letter(X, Y));
       this.addPiece(X, Y, hold);
     };
+
     this.moveToEmptySpot = function (x, y, X, Y) {
       var hold = this.removePiece(x, y);
       this.addPiece(X, Y, hold);
     };
 
-    // These two functions might be useful later for the PEAL and SPLIT funcionality
-    this.addPiece = function (x, y, letter) {
-      this.matrix(x, y, letter);
+    this.addPiece = function (x, y, value) {
+      this.letter(x, y, value);
       this.colorWord(x, y);
     };
+
     this.removePiece = function (x, y) {
-      var piece = this.matrix(x, y);
-      this.matrix(x, y, 0);
-      this.blueLetterMatrix[y][x] = 0;
-      this.redLetterMatrix[y][x] = 0;
+      var piece = this.letter(x, y);
+      this.letter(x, y, 0);
+      this.matrix[y][x].row = 0;
+      this.matrix[y][x].col = 0;
       this.updateWords(x, y);
       return piece;
     };
@@ -54,68 +55,71 @@ var Board = Backbone.Model.extend({
       return false;
     };
 
-    //an important function for the letterMatrix: works as both GET and SET, depending on whether third argument is passed
-    this.matrix = function (x, y, value) {
+    //an important function for the matrix: works as both GET and SET for letters, depending on whether a third argument is passed
+    this.letter = function (x, y, value) {
       if (value !== undefined) {
-        this.letterMatrix[y][x] = value;
+        this.matrix[y][x].letter = value;
       } else if (x < this.width && x > -1 && y < this.height && y > -1) {
-        return this.letterMatrix[y][x];
+        return this.matrix[y][x].letter;
       } else {
         return 0;
       }
     };
 
     //these four functions take in the output of the 'grab' functions below, using the data to properly alter the two ancillary matrices (redLetterMatrix and blueLetterMatrix)
-    this.blueWord = function (word) {
+
+    this.deactivateCol = function (word) {
       for (var i = 1; i < word.length; i++) {
         var x = word[i][0], y = word[i][1];
         if (x < this.width && x > -1 && y < this.height && y > -1) {
-          this.blueLetterMatrix[y][x] = 1;
+          this.matrix[y][x].col = 0;
         }
       }
     };
-    this.unblueWord = function (word) {
+    this.activateCol = function (word) {
       for (var i = 1; i < word.length; i++) {
         var x = word[i][0], y = word[i][1];
         if (x < this.width && x > -1 && y < this.height && y > -1) {
-          this.blueLetterMatrix[y][x] = 0;
-        }
-      }
-    };
-    this.redWord = function (word) {
-      for (var i = 1; i < word.length; i++) {
-        var x = word[i][0], y = word[i][1];
-        if (x < this.width && x > -1 && y < this.height && y > -1) {
-          this.redLetterMatrix[y][x] = 1;
-        }
-      }
-    };
-    this.unredWord = function (word) {
-      for (var i = 1; i < word.length; i++) {
-        var x = word[i][0], y = word[i][1];
-        if (x < this.width && x > -1 && y < this.height && y > -1) {
-          this.redLetterMatrix[y][x] = 0;
+          this.matrix[y][x].col = 1;
         }
       }
     };
 
+    this.deactivateRow = function (word) {
+      for (var i = 1; i < word.length; i++) {
+        var x = word[i][0], y = word[i][1];
+        if (x < this.width && x > -1 && y < this.height && y > -1) {
+          this.matrix[y][x].row = 0;
+        }
+      }
+    };
 
-    //takes in the coordinates of a piace, and checks the scrabble-validity of both the row- and column- word of which it is a part, and colors them accordingly.
+    this.activateRow = function (word) {
+      for (var i = 1; i < word.length; i++) {
+      var x = word[i][0], y = word[i][1];
+      if (x < this.width && x > -1 && y < this.height && y > -1) {
+        this.matrix[y][x].row = 1;
+      }
+      }
+    }
+
+
+    //takes in the coordinates of a piece, and checks the scrabble-validity of both the row- and column- word of which it is a part, and colors them accordingly.
     this.colorWord = function (x, y) {
       var rowWord = this.grabRowWord(x, y);
       var colWord = this.grabColWord(x, y);
       if (rowWord) {
         if (this.checkWord(rowWord[0])) {
-          this.blueWord(rowWord);
+          this.activateRow(rowWord);
         } else {
-          this.unblueWord(rowWord);
+          this.deactivateRow(rowWord);
         }
       }
       if (colWord) {
         if (this.checkWord(colWord[0])) {
-          this.redWord(colWord);
+          this.activateCol(colWord);
         } else {
-          this.unredWord(colWord);
+          this.deactivateCol(colWord);
         }
       }
     };
@@ -125,53 +129,53 @@ var Board = Backbone.Model.extend({
     //second while loop iterates from the first letter to last, building the letters into a string, which is placed as the first element in the returned array.
     //the other elements of the array are tuples of the position of each letter in the potential word (this can be done more efficiently)
     this.grabRowWord = function (x, y) {
-      if (this.matrix(x, y) === 0) {
+      if (this.letter(x, y) === 0) {
         return;
       }
-      var atFirstLetter = this.matrix(x-1, y) === 0 ? true : false;
+      var atFirstLetter = this.letter(x-1, y) === 0 ? true : false;
       while (atFirstLetter === false) {
         x--;
-        atFirstLetter = this.matrix(x-1, y) === 0 ? true : false;
+        atFirstLetter = this.letter(x-1, y) === 0 ? true : false;
       }
-      var string = this.matrix(x, y);
+      var string = this.letter(x, y);
       var result = [string, [x, y]];
-      var atLastLetter = this.matrix(x+1, y) === 0 ? true : false;
+      var atLastLetter = this.letter(x+1, y) === 0 ? true : false;
       while (atLastLetter === false) {
         x++;
-        result[0] += this.matrix(x, y);
+        result[0] += this.letter(x, y);
         result.push([x, y]);
-        atLastLetter = this.matrix(x+1, y) === 0 ? true : false;
+        atLastLetter = this.letter(x+1, y) === 0 ? true : false;
       }
       return result;
     };
     this.grabColWord = function(x, y) {
-      if (this.matrix(x, y) === 0) {
+      if (this.letter(x, y) === 0) {
         return;
       }
-      var atFirstLetter = this.matrix(x, y-1) === 0 ? true : false;
+      var atFirstLetter = this.letter(x, y-1) === 0 ? true : false;
       while (atFirstLetter === false) {
         y--;
-        atFirstLetter = this.matrix(x, y-1) === 0 ? true : false;
+        atFirstLetter = this.letter(x, y-1) === 0 ? true : false;
       }
-      var string = this.matrix(x, y);
+      var string = this.letter(x, y);
       var result = [string, [x, y]];
-      var atLastLetter = this.matrix(x, y+1) === 0 ? true : false;
+      var atLastLetter = this.letter(x, y+1) === 0 ? true : false;
       while (atLastLetter === false) {
         y++;
-        result[0] += this.matrix(x, y);
+        result[0] += this.letter(x, y);
         result.push([x, y]);
-        atLastLetter = this.matrix(x, y+1) === 0 ? true : false;
+        atLastLetter = this.letter(x, y+1) === 0 ? true : false;
       }
       return result;
     };
 
 
-    this.makeEmptyMatrix = function (size) {
+    this.makeEmptyMatrix = function (width, height) {
       var i, j, matrix = [];
-      for (i = 0; i < this.height; i++) {
+      for (i = 0; i < height; i++) {
         var row = [];
-        for (j = 0; j < this.width; j++) {
-          row.push(0);
+        for (j = 0; j < width; j++) {
+          row.push({letter: 0, row: 0, col: 0});
         }
         matrix.push(row);
       }
@@ -182,41 +186,31 @@ var Board = Backbone.Model.extend({
       if (type === 'top') {
         for (var y = this.height -1; y >=0; y--) {
           for (var x = 0; x < this.width; x++) {
-            if (this.matrix(x, y) !== 0) {
-              this.matrix(x, y+1, this.matrix(x, y));
-              this.matrix(x, y, 0);
-              this.redLetterMatrix[y][x] = 0;
-              this.redLetterMatrix[y+1][x] = 1;
-              this.blueLetterMatrix[y][x] = 0;
-              this.blueLetterMatrix[y+1][x] = 1;
+            if (this.letter(x, y) !== 0) {
+              this.matrix[y+1][x] = this.matrix[y][x];
+              this.matrix[y][x] = {letter: 0, row: 0, col: 0};
             }
           }
         }
       } else if (type === 'bottom') {
         var newRow = [];
         for (var i = 0; i < this.width; i++) {
-          newRow.push(0);
+          newRow.push({letter: 0, row: 0, col: 0});
         }
-        this.letterMatrix.push(newRow);
+        this.matrix.push(newRow);
         this.height++;
       } else if (type === 'left') {
         for (var y = this.height -1; y >= 0; y--) {
           for (var x = this.width -1; x >= 0; x--) {
-            if (this.matrix(x, y) !== 0) {
-              this.matrix(x+1, y, this.matrix(x, y));
-              this.matrix(x, y, 0);
-              this.redLetterMatrix[y][x] = 0;
-              this.redLetterMatrix[y][x+1] = 1;
-              this.blueLetterMatrix[y][x] = 0;
-              this.blueLetterMatrix[y][x+1] = 1;
+            if (this.letter(x, y) !== 0) {
+              this.matrix[y][x+1] = this.matrix[y][x];
+              this.matrix[y][x] = {letter: 0, row: 0, col: 0};
             }
           }
         }
       } else if (type === 'right') {
         for (var i = 0; i < this.height; i++) {
-          this.letterMatrix[i].push(0);
-          this.redLetterMatrix[i].push(0);
-          this.blueLetterMatrix[i].push(0);
+          this.matrix[i].push({letter: 0, row: 0, col: 0});
         }
         this.width++;
       }
@@ -228,18 +222,15 @@ var Board = Backbone.Model.extend({
     this.randomLetter = function () {
       return this.frequency[Math.floor(Math.random() * this.frequency.length)];
     };
-    this.letterMatrix = this.makeEmptyMatrix(this.height);
-    this.blueLetterMatrix = this.makeEmptyMatrix(this.height);
-    this.redLetterMatrix = this.makeEmptyMatrix(this.height);
 
-    for (i = 0; i < 4; i++) {
-      var letter = this.randomLetter();
-      this.addPiece(1 + i * 2, 2, letter);
+    this.matrix = this.makeEmptyMatrix(this.width, this.height);
+    
+    for (var i = 0; i < 3; i++) {
+      this.letter(2 + i * 2, 2, this.randomLetter());
     }
 
-    for (i = 0; i < 3; i++) {
-      var letter = this.randomLetter();
-      this.addPiece(2 + i * 2, 1, letter);
+    for (i = 0; i < 4; i++) {
+      this.letter(1 + i * 2, 3, this.randomLetter());
     }
     
   } // end of initialize
