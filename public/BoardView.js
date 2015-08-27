@@ -3,6 +3,7 @@ var BoardView = Backbone.View.extend({
   initialize: function() {
     this.render();
 
+
     //this handles the clicking: first click on piece stores its data. The next click, if on another piece,
     //switches the two; if the second click is made on an empty spot, the original piece is simple moved there.
     var X = Y = 0,

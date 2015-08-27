@@ -19,7 +19,6 @@ var SocketModel = Backbone.Model.extend({
       socket.emit('peeling');
     };
 
-
     context.split = function(pieceToRemove) {
       console.log('client splitting', pieceToRemove);
       socket.emit('splitting', pieceToRemove);
