@@ -18,8 +18,10 @@
   "homepage": "https://github.com/darrinmn9/Applegrams-2",
   "depedencies": {},
   "dependencies": {
+    "cors": "^2.7.1",
     "express": "^4.13.3",
     "node": "0.0.0",
+    "nodemon": "^1.4.1",
     "socket.io": "^1.3.6",
     "underscore": "^1.8.3"
   }

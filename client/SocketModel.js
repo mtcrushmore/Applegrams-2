@@ -15,7 +15,7 @@ var SocketModel = Backbone.Model.extend({
   initialize: function() {
     console.log('socket model init');
 
-    var socket = io.connect();
+    var socket = io.connect('http://localhost:3000');
     var userId = null;
     this.startingPieces = null;
 
