@@ -1,16 +1,31 @@
 var Board = Backbone.Model.extend({
 
   initialize: function() {
+    this.set('storage', {});
+    var storage = this.get('storage');
 
     //creates new instance of socketIO to sync individual client events with server
     this.set('socket', new SocketModel());
+    var socket = this.get('socket');
 
     //listening for socket events
-    this.get('socket').on('createBoard', function() {
-      console.log('Board is listening');
+    socket.on('createBoard', function(startingPieces) {
+      console.log('BoardModel recieved starting pieces: ', startingPieces);
+      storage.pieces = startingPieces;
+
+      // for (var i = 0; i < storage.pieces.length; i++) {
+      //   this.addPiece(1, i % 2, storage.pieces[i]);
+      // }
+
     }, this);
 
-    this.get('socket').split('TEST');
+    socket.on('userId', function(id) {
+      storage.userId = id;
+    }, this);
+
+    socket.on('joined', function() {
+
+    }, this);
 
 
 

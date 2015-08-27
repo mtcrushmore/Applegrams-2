@@ -1,12 +1,15 @@
 var BoardView = Backbone.View.extend({
 
-  initialize: function () {
+  initialize: function() {
     this.render();
 
     //this handles the clicking: first click on piece stores its data. The next click, if on another piece,
     //switches the two; if the second click is made on an empty spot, the original piece is simple moved there.
-    var X = Y = 0, config = this.model, that = this, chop = false;
-    $('rect').on('click', function (event) {
+    var X = Y = 0,
+      config = this.model,
+      that = this,
+      chop = false;
+    $('rect').on('click', function(event) {
       if (X === 0 && $(event.currentTarget).attr('fill') !== 'white') {
         X = Number($(event.currentTarget).attr('config_x'));
         Y = Number($(event.currentTarget).attr('config_y'));
@@ -38,10 +41,10 @@ var BoardView = Backbone.View.extend({
         }
       }
     });
-   
+
   },
 
-  render: function () {
+  render: function() {
     this.$el.html('');
 
     this.spacing = 100;
@@ -57,7 +60,7 @@ var BoardView = Backbone.View.extend({
   },
 
   //this function simply updates the View based off the state of the Model (the three matrices in BoardModel.js)
-  tileIt: function () {
+  tileIt: function() {
     d3.selectAll('rect').remove();
     d3.selectAll('text').remove();
     var redCount = blueCount = letterCount = doubleCheck = 0;
@@ -78,11 +81,11 @@ var BoardView = Backbone.View.extend({
         if (letterMatrix[y][x] !== 0) {
           letterCount++;
           //these two IF statements ensure lonely letters, in a column or row, will not be mistaken for invalid words
-          if (this.model.matrix(x, y-1) === 0 && this.model.matrix(x, y+1) === 0) {
+          if (this.model.matrix(x, y - 1) === 0 && this.model.matrix(x, y + 1) === 0) {
             redLetters[y][x] = 1;
             doubleCheck++;
           }
-          if (this.model.matrix(x-1, y) === 0 && this.model.matrix(x+1, y) === 0) {
+          if (this.model.matrix(x - 1, y) === 0 && this.model.matrix(x + 1, y) === 0) {
             blueLetters[y][x] = 1;
             doubleCheck++;
           }
@@ -164,14 +167,14 @@ var BoardView = Backbone.View.extend({
       }
     }
     //at the end of this long iteration, we check to see if the counts match,
-    //which would imply that all words are valid 
+    //which would imply that all words are valid
     if (redCount + blueCount === letterCount * 2) {
       this.checkIfConnected(letterCount);
     }
   },
 
   //after all the words have been validated, this step makes sure they are all a part of one big body (not separate)
-  checkIfConnected: function (letters) {
+  checkIfConnected: function(letters) {
     var letterMatrix = [];
     for (var i = 0; i < this.model.letterMatrix.length; i++) {
       letterMatrix.push(this.model.letterMatrix[i].slice());
@@ -186,17 +189,19 @@ var BoardView = Backbone.View.extend({
         }
       }
     }
-    var count = 0; 
+    var count = 0;
     var model = this.model;
-    function crawler (point) { 
-      var x = point[0], y = point[1];
+
+    function crawler(point) {
+      var x = point[0],
+        y = point[1];
       if (letterMatrix[y] && !!letterMatrix[y][x]) {
         count++;
         letterMatrix[y][x] = 0;
-        crawler([x+1, y]);
-        crawler([x-1, y]);
-        crawler([x, y+1]);
-        crawler([x, y-1]);
+        crawler([x + 1, y]);
+        crawler([x - 1, y]);
+        crawler([x, y + 1]);
+        crawler([x, y - 1]);
       }
     }
     crawler(startPoint);
@@ -205,25 +210,25 @@ var BoardView = Backbone.View.extend({
     }
   },
 
-  //temporary 
-  completed: function () {
+  //temporary
+  completed: function() {
     this.bite();
   },
 
   //places new piece below lowest, most to-the-right, current piece
-  bite: function () {
-    for (var i = this.height-1; i >= 0; i--) {
-      for (var j = this.width-1; j >= 0; j--) {
+  bite: function() {
+    for (var i = this.height - 1; i >= 0; i--) {
+      for (var j = this.width - 1; j >= 0; j--) {
         if (this.model.letterMatrix[i][j] !== 0) {
-          this.model.addPiece(2, i+1, this.model.randomLetter());
+          this.model.addPiece(2, i + 1, this.model.randomLetter());
           this.tileIt();
-          return i+1; 
+          return i + 1;
         }
       }
     }
   },
 
-  chop: function () {
+  chop: function() {
     var spot = this.bite();
     this.model.addPiece(3, spot, this.model.randomLetter());
     this.model.addPiece(4, spot, this.model.randomLetter());

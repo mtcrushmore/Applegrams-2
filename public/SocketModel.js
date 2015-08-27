@@ -3,7 +3,6 @@ var SocketModel = Backbone.Model.extend({
 
   initialize: function() {
     var context = this;
-    console.log('socket model init');
 
     var socket = io.connect('http://localhost:3000/');
     var userId = null;
@@ -29,12 +28,14 @@ var SocketModel = Backbone.Model.extend({
     //stores unique player ID, used for retrieving peel
     socket.on('userId', function(data) {
       context.userId = data;
+      context.trigger('userId', data);
     });
 
     //array containing starting pieces
     socket.on('joined', function(data) {
+      console.log('socketModel recieved board: ', data);
       context.startingPieces = data;
-      context.trigger('createBoard', context);
+      context.trigger('createBoard', data);
       //trigger show board event
     });
 
