@@ -8,9 +8,11 @@ var Board = Backbone.Model.extend({
     this.set('socket', new SocketModel());
     var socket = this.get('socket');
 
-    //*these functions should be called when BoardModel needs to peel or split
-    // socket.peeling()
-    // socket.splitting(pieceToRemove)
+    //these functions should be called when BoardModel needs to peel or split
+    /*
+      socket.peeling()
+      socket.splitting(pieceToRemove)
+    */
 
 
 
@@ -19,12 +21,13 @@ var Board = Backbone.Model.extend({
       console.log('BoardModel recieved starting pieces: ', startingBoard);
       storage.pieces = startingBoard;
 
-      //*need to arrange storage.pieces to the board and make BoardView Rerender
+      //need to arrange storage.pieces to the board and make BoardView Rerender
 
-      /* for (var i = 0; i < storage.pieces.length; i++) {
-         this.addPiece(1, i % 2, storage.pieces[i]);
-       }
-       */
+      /*
+        for (var i = 0; i < storage.pieces.length; i++) {
+          this.addPiece(1, i % 2, storage.pieces[i]);
+        }
+      */
 
     }, this);
 
