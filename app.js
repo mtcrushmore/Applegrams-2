@@ -1,14 +1,17 @@
 var _ = require('underscore');
 var express = require('express');
 var app = express();
+
 var port = process.env.PORT || 3000;
-var server = app.listen(port);
+var server = app.listen(port, function() {
+  console.log('Applegrams server is listening on port: ', port);
+});
 var io = require('socket.io').listen(server);
 var cors = require('cors');
 app.use(cors());
 
-//server files in /client folder
-app.use(express.static(__dirname + '/client'));
+//server files in /public folder
+app.use(express.static(__dirname + '/public'));
 
 
 var letterPool = ['A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'B', 'B', 'B', 'C', 'C', 'C', 'D', 'D', 'D', 'D', 'D', 'D', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'F', 'F', 'F', 'G', 'G', 'G', 'G', 'H', 'H', 'H', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'J', 'J', 'K', 'K', 'L', 'L', 'L', 'L', 'L', 'M', 'M', 'M', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'P', 'P', 'P', 'Q', 'Q', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'S', 'S', 'S', 'S', 'S', 'S', 'T', 'T', 'T', 'T', 'T', 'T', 'T', 'T', 'T', 'U', 'U', 'U', 'U', 'U', 'U', 'V', 'V', 'V', 'W', 'W', 'W', 'X', 'X', 'Y', 'Y', 'Y', 'Z', 'Z']
@@ -44,6 +47,7 @@ function peelToWin(pool, players) {
 
 io.on('connection', function(socket) {
   console.log('player connected');
+  console.log(letterPool.length);
   playerCount++;
   var addUser = true;
 
