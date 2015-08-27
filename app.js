@@ -1,14 +1,14 @@
+var _ = require('underscore');
 var express = require('express');
-var app = require('express').createServer();
-var io = require('socket.io')(app);
-var underscore = require('underscore');
+var app = express();
 var port = process.env.PORT || 3000;
-app.listen(port, function() {
-  console.log('Server listening at port ', port);
-});
+var server = app.listen(port);
+var io = require('socket.io').listen(server);
+var cors = require('cors');
+app.use(cors());
 
-//server files in /public folder
-app.use(express.static(__dirname + '/public'));
+//server files in /client folder
+app.use(express.static(__dirname + '/client'));
 
 
 var letterPool = ['A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'B', 'B', 'B', 'C', 'C', 'C', 'D', 'D', 'D', 'D', 'D', 'D', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'F', 'F', 'F', 'G', 'G', 'G', 'G', 'H', 'H', 'H', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'J', 'J', 'K', 'K', 'L', 'L', 'L', 'L', 'L', 'M', 'M', 'M', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'P', 'P', 'P', 'Q', 'Q', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'S', 'S', 'S', 'S', 'S', 'S', 'T', 'T', 'T', 'T', 'T', 'T', 'T', 'T', 'T', 'U', 'U', 'U', 'U', 'U', 'U', 'V', 'V', 'V', 'W', 'W', 'W', 'X', 'X', 'Y', 'Y', 'Y', 'Z', 'Z']
@@ -43,6 +43,7 @@ function peelToWin(pool, players) {
 }
 
 io.on('connection', function(socket) {
+  console.log('player connected');
   playerCount++;
   var addUser = true;
 
@@ -56,6 +57,8 @@ io.on('connection', function(socket) {
   socket.broadcast.emit('another player has joined');
 
   socket.on('peeling', function(socket) {
+    console.log('peeling');
+
     //will end the game if peeling event is emitting when pieces < players
     if (lastPeel) {
       socket.emit('You Win');
@@ -79,6 +82,8 @@ io.on('connection', function(socket) {
   });
 
   socket.on('spliting', function(socket, incomingPiece) {
+    console.log('player spliting');
+
     //send user 3 pieces and add back original piece to letter pool
     socket.emit('split', split(letterPool, incomingPiece));
 
@@ -89,6 +94,8 @@ io.on('connection', function(socket) {
   });
 
   socket.on('disconnect', function() {
+    console.log('player disconnected');
+
     //not sure how to handle if someone leaves the game, should this affect peelToWin?
     if (addUser) {
       playerCount--;
