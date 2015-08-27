@@ -13,65 +13,66 @@ var SocketModel = Backbone.Model.extend({
   },
 
   initialize: function() {
+    var context = this;
     console.log('socket model init');
 
     var socket = io.connect('http://localhost:3000');
     var userId = null;
-    this.startingPieces = null;
+    context.startingPieces = null;
 
     //keeps log of all peels, most recent piece pushed to end
-    this.peels = [];
+    context.peels = [];
 
     //keeps log of all splits, most recent pieces pushed to end
-    this.splits = [];
+    context.splits = [];
 
     //stores unique player ID, used for retrieving peel
     socket.on('userId', function(data) {
-      this.userId = data;
+      context.userId = data;
     });
 
     //array containing starting pieces
     socket.on('joined', function(data) {
-      this.startingPieces = data;
-      this.trigger('createBoard', this);
+      context.startingPieces = data;
+      context.trigger('createBoard', context);
       //trigger show board event
     });
 
     socket.on('another player has joined', function() {
       console.log('another player joined');
-      this.trigger('playerJoined', this);
+      context.trigger('playerJoined', context);
     });
 
     socket.on('You Win', function() {
-      this.trigger('win', this);
+      context.trigger('win', context);
     });
 
     socket.on('You Lose', function(data) {
-      this.trigger('lose', this);
+      context.trigger('lose', context);
     });
 
     socket.on('peeled', function(data) {
       console.log('the server peeled');
 
-      this.peels.push(data[userId - 1]);
+      context.peels.push(data[userId - 1]);
       //trigger peel event
-      this.trigger('peel', this);
+      context.trigger('peel', context);
     });
 
     socket.on('peelToWin', function(data) {
       //display "Next peel wins!!!"
-      this.trigger('peelToWin', this);
+      context.trigger('peelToWin', context);
     });
 
     socket.on('split', function(data) {
       console.log('split was sent back from server');
-      this.splits = this.splits.concat(data);
-      this.trigger('split', this);
+      context.splits = context.splits.concat(data);
+      context.trigger('split', context);
     });
 
     socket.on('player disconnected', function(data) {
       console.log('other player disconnected');
-      this.trigger('playerDisconnected', this);
+      context.trigger('playerDisconnected', context);
     });
   }
 

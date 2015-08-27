@@ -5,6 +5,19 @@ var Board = Backbone.Model.extend({
     //creates new instance of socketIO to sync individual client events with server
     this.set('socket', new SocketModel());
 
+    //listening for socket events
+    this.get('socket').on('createBoard', function() {
+      console.log('Board is listening');
+    }, this);
+
+
+
+
+
+
+
+
+
     //These functions operate on one or all of the three 10-by-10 matrices used as our Models, and built at the bottom of initialize (scroll down).
     // (0,0) is the coordinate of the top-left-most spot in each matrix.
     //The most important matrix is the "letterMatrix," which holds a value of zero where there are no tiles placed, and values of the letter itself, where it is placed
