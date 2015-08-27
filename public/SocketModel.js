@@ -1,22 +1,11 @@
 var SocketModel = Backbone.Model.extend({
 
-  peel: function() {
-    console.log('client peeling');
-
-    socket.emit('peeling');
-  },
-
-  split: function(pieceToRemove) {
-    console.log('client splitting');
-
-    socket.emit('peeling', pieceToRemove);
-  },
 
   initialize: function() {
     var context = this;
     console.log('socket model init');
 
-    var socket = io.connect('http://localhost:3000');
+    var socket = io.connect('http://localhost:3000/');
     var userId = null;
     context.startingPieces = null;
 
@@ -25,6 +14,17 @@ var SocketModel = Backbone.Model.extend({
 
     //keeps log of all splits, most recent pieces pushed to end
     context.splits = [];
+
+    context.peel = function() {
+      console.log('client peeling');
+      socket.emit('peeling');
+    };
+
+
+    context.split = function(pieceToRemove) {
+      console.log('client splitting', pieceToRemove);
+      socket.emit('splitting', pieceToRemove);
+    };
 
     //stores unique player ID, used for retrieving peel
     socket.on('userId', function(data) {

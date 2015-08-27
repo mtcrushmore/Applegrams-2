@@ -60,7 +60,7 @@ io.on('connection', function(socket) {
   //broadcast event to other players
   socket.broadcast.emit('another player has joined');
 
-  socket.on('peeling', function(socket) {
+  socket.on('peeling', function() {
     console.log('peeling');
 
     //will end the game if peeling event is emitting when pieces < players
@@ -85,7 +85,7 @@ io.on('connection', function(socket) {
 
   });
 
-  socket.on('spliting', function(socket, incomingPiece) {
+  socket.on('spliting', function(incomingPiece) {
     console.log('player spliting');
 
     //send user 3 pieces and add back original piece to letter pool

@@ -10,11 +10,7 @@ var Board = Backbone.Model.extend({
       console.log('Board is listening');
     }, this);
 
-
-
-
-
-
+    this.get('socket').split('TEST');
 
 
 
