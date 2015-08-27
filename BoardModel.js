@@ -2,14 +2,8 @@ var Board = Backbone.Model.extend({
 
   initialize: function () {
 
-    this.width = 12;
-    this.height = 10;
-
-    this.emptySpot = {
-      letter: 0,
-      row: 0,
-      col: 0
-    }
+    this.width = 17;
+    this.height = 15;
 
     this.switchPieces = function (x, y, X, Y) {
       var hold = this.letter(x, y);
@@ -193,12 +187,14 @@ var Board = Backbone.Model.extend({
           }
         }
       } else if (type === 'bottom') {
-        var newRow = [];
-        for (var i = 0; i < this.width; i++) {
-          newRow.push({letter: 0, row: 0, col: 0});
+         for (var y = 0; y <= this.height; y++) {
+          for (var x = 0; x < this.width; x++) {
+            if (this.letter(x, y) !== 0) {
+              this.matrix[y-1][x] = this.matrix[y][x];
+              this.matrix[y][x] = {letter: 0, row: 0, col: 0};
+            }
+          }
         }
-        this.matrix.push(newRow);
-        this.height++;
       } else if (type === 'left') {
         for (var y = this.height -1; y >= 0; y--) {
           for (var x = this.width -1; x >= 0; x--) {
@@ -209,15 +205,17 @@ var Board = Backbone.Model.extend({
           }
         }
       } else if (type === 'right') {
-        for (var i = 0; i < this.height; i++) {
-          this.matrix[i].push({letter: 0, row: 0, col: 0});
+        for (var y = this.height -1; y >= 0; y--) {
+          for (var x = 0; x < this.width; x++) {
+            if (this.letter(x, y) !== 0) {
+              this.matrix[y][x-1] = this.matrix[y][x];
+              this.matrix[y][x] = {letter: 0, row: 0, col: 0};
+            }
+          }
         }
-        this.width++;
       }
     }
 
-
-    //TEMPORARY until multiplayer server funcionality complete: hands over seven random letters based off of frequency of letters in English language
     this.frequency = ["A","A","A","A","A","A","A","A","A","B","B","C","C","D","D","D","D","E","E","E","E","E","E","E","E","E","E","E","E","F","F","G","G","G","H","H","I","I","I","I","I","I","I","I","I","J","K","L","L","L","L","M","M","N","N","N","N","N","N","O","O","O","O","O","O","O","O","P","P","Q","R","R","R","R","R","R","S","S","S","S","T","T","T","T","T","T","U","U","U","U","V","V","W","W","X","Y","Y","Z"];
     this.randomLetter = function () {
       return this.frequency[Math.floor(Math.random() * this.frequency.length)];
@@ -226,11 +224,11 @@ var Board = Backbone.Model.extend({
     this.matrix = this.makeEmptyMatrix(this.width, this.height);
     
     for (var i = 0; i < 3; i++) {
-      this.letter(2 + i * 2, 2, this.randomLetter());
+      this.letter(6 + i * 2, 4, this.randomLetter());
     }
 
     for (i = 0; i < 4; i++) {
-      this.letter(1 + i * 2, 3, this.randomLetter());
+      this.letter(5 + i * 2, 5, this.randomLetter());
     }
     
   } // end of initialize

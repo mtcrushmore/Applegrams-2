@@ -44,7 +44,7 @@ var BoardView = Backbone.View.extend({
   render: function () {
     this.$el.html('');
 
-    this.spacing = 100;
+    this.spacing = 75;
     this.matrix = this.model.matrix;
     this.width = this.model.width;
     this.height = this.model.height;
@@ -150,14 +150,14 @@ var BoardView = Backbone.View.extend({
             this.model.makeBigger('left');
             this.tileIt();
           }
-          // if (y >= this.height - 2) {
-          //   this.model.makeBigger('bottom');
-          //   this.tileIt();
-          // }
-          // if (x >= this.width -2) {
-          //   this.model.makeBigger('right');
-          //   this.tileIt();
-          // }
+          if (y >= this.height - 2) {
+            this.model.makeBigger('bottom');
+            this.tileIt();
+          }
+          if (x >= this.width -2) {
+            this.model.makeBigger('right');
+            this.tileIt();
+          }
         }
       }
     }
