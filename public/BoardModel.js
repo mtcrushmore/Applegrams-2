@@ -8,14 +8,23 @@ var Board = Backbone.Model.extend({
     this.set('socket', new SocketModel());
     var socket = this.get('socket');
 
-    //listening for socket events
-    socket.on('createBoard', function(startingPieces) {
-      console.log('BoardModel recieved starting pieces: ', startingPieces);
-      storage.pieces = startingPieces;
+    //*these functions should be called when BoardModel needs to peel or split
+    // socket.peeling()
+    // socket.splitting(pieceToRemove)
 
-      // for (var i = 0; i < storage.pieces.length; i++) {
-      //   this.addPiece(1, i % 2, storage.pieces[i]);
-      // }
+
+
+    //*listening for socket events
+    socket.on('joined', function(startingBoard) {
+      console.log('BoardModel recieved starting pieces: ', startingBoard);
+      storage.pieces = startingBoard;
+
+      //*need to arrange storage.pieces to the board and make BoardView Rerender
+
+      /* for (var i = 0; i < storage.pieces.length; i++) {
+         this.addPiece(1, i % 2, storage.pieces[i]);
+       }
+       */
 
     }, this);
 
@@ -23,9 +32,36 @@ var Board = Backbone.Model.extend({
       storage.userId = id;
     }, this);
 
-    socket.on('joined', function() {
+    socket.on('peel', function(pieceToAdd) {
 
     }, this);
+
+    socket.on('split', function(PiecesToAdded) {
+
+    }, this);
+
+    socket.on('playerJoined', function() {
+
+    }, this);
+
+    socket.on('peelToWin', function() {
+
+    }, this);
+
+    socket.on('win', function() {
+
+    }, this);
+
+    socket.on('lose', function(winningBoard) {
+
+    }, this);
+
+    socket.on('playerDisconnected', function() {
+
+    }, this);
+
+
+
 
 
 

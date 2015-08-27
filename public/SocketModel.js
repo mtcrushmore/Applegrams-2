@@ -14,15 +14,23 @@ var SocketModel = Backbone.Model.extend({
     //keeps log of all splits, most recent pieces pushed to end
     context.splits = [];
 
-    context.peel = function() {
+    context.peeling = function() {
       console.log('client peeling');
       socket.emit('peeling');
     };
 
-    context.split = function(pieceToRemove) {
+    context.splitting = function(pieceToRemove) {
       console.log('client splitting', pieceToRemove);
       socket.emit('splitting', pieceToRemove);
     };
+
+    //array containing starting pieces
+    socket.on('joined', function(startingBoard) {
+      console.log('socketModel recieved board: ', startingBoard);
+      context.startingPieces = startingBoard;
+      context.trigger('joined', startingBoard);
+      //trigger show board event
+    });
 
     //stores unique player ID, used for retrieving peel
     socket.on('userId', function(data) {
@@ -30,49 +38,42 @@ var SocketModel = Backbone.Model.extend({
       context.trigger('userId', data);
     });
 
-    //array containing starting pieces
-    socket.on('joined', function(data) {
-      console.log('socketModel recieved board: ', data);
-      context.startingPieces = data;
-      context.trigger('createBoard', data);
-      //trigger show board event
+    socket.on('peeled', function(pieceToAdd) {
+      console.log('the server peeled');
+
+      context.peels.push(pieceToAdd[userId - 1]);
+      //trigger peel evepent
+      context.trigger('peel', pieceToAdd);
+    });
+
+    socket.on('split', function(PiecesToAdded) {
+      console.log('split was sent back from server');
+      context.splits = context.splits.concat(PiecesToAdded);
+      context.trigger('split', PiecesToAdded);
     });
 
     socket.on('another player has joined', function() {
       console.log('another player joined');
-      context.trigger('playerJoined', context);
+      context.trigger('playerJoined');
+    });
+
+    socket.on('peelToWin', function() {
+      //display "Next peel wins!!!"
+      context.trigger('peelToWin');
     });
 
     socket.on('You Win', function() {
-      context.trigger('win', context);
+      context.trigger('win');
     });
 
-    socket.on('You Lose', function(data) {
-      context.trigger('lose', context);
+    socket.on('You Lose', function(winningBoard) {
+      context.trigger('lose', winningBoard);
     });
 
-    socket.on('peeled', function(data) {
-      console.log('the server peeled');
 
-      context.peels.push(data[userId - 1]);
-      //trigger peel event
-      context.trigger('peel', context);
-    });
-
-    socket.on('peelToWin', function(data) {
-      //display "Next peel wins!!!"
-      context.trigger('peelToWin', context);
-    });
-
-    socket.on('split', function(data) {
-      console.log('split was sent back from server');
-      context.splits = context.splits.concat(data);
-      context.trigger('split', context);
-    });
-
-    socket.on('player disconnected', function(data) {
+    socket.on('player disconnected', function() {
       console.log('other player disconnected');
-      context.trigger('playerDisconnected', context);
+      context.trigger('playerDisconnected');
     });
   }
 
