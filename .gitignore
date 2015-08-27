@@ -32,6 +32,7 @@ results
 npm-debug.log
 node_modules
 
+
 ###PhPStorm###
 
 .idea/
@@ -42,7 +43,7 @@ node_modules
 *.sublime-workspace
 
 # bower
-client/bower_components
+public/bower_components
 
 # audio
 *.aif
